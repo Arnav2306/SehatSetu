@@ -1,4 +1,13 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const getApiBaseUrl = () => {
+  const raw = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').trim();
+  if (raw.includes(',')) {
+    const urls = raw.split(',').map((u) => u.trim().replace(/\/+$/, '')).filter(Boolean);
+    return import.meta.env.DEV ? urls[0] : urls[urls.length - 1];
+  }
+  return raw.replace(/\/+$/, '');
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export const checkHealth = async () => {
   const response = await fetch(`${API_BASE_URL}/api/health`);

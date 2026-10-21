@@ -14,12 +14,17 @@ import { notFoundHandler, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
 
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-const allowedOrigins = new Set([
-  clientUrl,
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-]);
+const parseOrigins = () => {
+  const defaultOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+  const configured = (process.env.CLIENT_URL || '')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
+
+  return new Set([...defaultOrigins, ...configured]);
+};
+
+const allowedOrigins = parseOrigins();
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.has(origin)) {
